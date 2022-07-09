@@ -13,15 +13,17 @@
 #define VTFLIB_H
 
 #ifdef VTFLIB_EXPORTS
-#	ifdef _WIN32
+#	if defined(_MSC_VER) && !defined(VTFLIB_STATIC)
 #		define VTFLIB_API __declspec(dllexport)
 #	elif defined(__clang__) || defined(__GNUC__)
-#		define VTFLIB_API __attribute__((visibility("default")))
+#		define VTFLIB_API	__attribute__((visibility("default")))
+#	else
+#		define VTFLIB_API
 #	endif
 #else
-#	ifdef _WIN32
+#	if defined(_WIN32) && !defined(VTFLIB_STATIC)
 #		define VTFLIB_API __declspec(dllimport)
-#	elif defined(__clang__) || defined(__GNUC__)
+#	else
 #		define VTFLIB_API
 #	endif
 #endif
