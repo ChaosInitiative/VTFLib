@@ -118,5 +118,5 @@ vlUInt CFileReader::Read(vlVoid *vData, vlUInt uiBytes)
 		LastError.Set("ReadFile() failed.", vlTrue);
 	}
 
-	return numRead == 1;
+	return numRead;
 }
