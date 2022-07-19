@@ -43,7 +43,7 @@ set(VTFLIB_SRCS
 
 if (VTFLIB_STATIC)
 	add_library(vtflib STATIC ${VTFLIB_SRCS})
-	target_compile_definitions(vtflib PRIVATE VTFLIB_STATIC)
+	target_compile_definitions(vtflib PUBLIC VTFLIB_STATIC)
 else()
 	add_library(vtflib SHARED ${VTFLIB_SRCS})
 endif()
@@ -55,11 +55,7 @@ if (UNIX)
 else()
 	target_link_directories(vtflib PUBLIC thirdparty/lib)
 	# Make sure to link against the correct variant
-	if ("${CMAKE_MSVC_RUNTIME_LIBRARY}" STREQUAL "MultiThreaded")
-		target_link_libraries(vtflib PUBLIC Compressonator_MT)
-	elseif("${CMAKE_MSVC_RUNTIME_LIBRARY}" STREQUAL "MultiThreadedDebug")
-		target_link_libraries(vtflib PUBLIC Compressonator_MTd)
-	endif()
+	target_link_libraries(vtflib PUBLIC "Compressonator_MT$<$<CONFIG:Debug>:d>")
 endif()
 
 target_compile_definitions(vtflib PRIVATE VTFLIB_EXPORTS)
