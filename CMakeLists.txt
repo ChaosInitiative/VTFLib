@@ -67,15 +67,3 @@ target_compile_definitions(vtflib PRIVATE VTFLIB_EXPORTS)
 target_precompile_headers(vtflib PRIVATE VTFLib/stdafx.h)
 target_include_directories(vtflib PUBLIC lib)
 
-#
-# VTFCMD (Windows only)
-#
-if (WIN32)
-	set(VTFCMD_SRCS
-		VTFCmd/vtfcmd.c
-		VTFCmd/enumerations.c)
-		
-	add_executable(vtfcmd ${VTFCMD_SRCS})
-
-	target_link_libraries(vtfcmd vtflib)
-endif()
