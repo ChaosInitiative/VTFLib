@@ -110,13 +110,13 @@ vlUInt CFileReader::Read(vlVoid *vData, vlUInt uiBytes)
 	{
 		return 0;
 	}
+   //== 1 ? uiBytes : 0;
+	size_t numRead = fread(vData, 1, uiBytes, this->hFile);
 
-	size_t numRead = fread(vData, uiBytes, 1, this->hFile);
-
-	if(numRead != 1)
+	if(numRead != uiBytes)
 	{
 		LastError.Set("fread() failed.", vlTrue);
 	}
 
-	return numRead == 1 ? uiBytes : 0;
+	return numRead;
 }
