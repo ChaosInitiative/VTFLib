@@ -322,7 +322,9 @@ namespace VTFLib
 
 		vlUInt GetFrameCount() const;	//!< Returns the frame count from the VTF header.
 		vlUInt GetFaceCount() const;	//!< Returns the face count from the VTF header.
-		vlUInt GetMipmapCount() const;	//!< Returns the number of MIP levels in the image from the VTF header.
+
+		vlUInt GetMipmapCount() const;															//!< Returns the number of MIP levels in the image from the VTF header.
+		vlVoid SetMipmapCount(vlUInt uiMipCount, VTFMipmapFilter MipmapFilter, vlBool bSRGB);	//!< Sets the number of MIP levels in the image.
 
 		vlUInt GetStartFrame() const;				//!< Returns the start frame from the VTF header.
 		vlVoid SetStartFrame(vlUInt uiStartFrame);  //!< Sets the start frame in the VTF header.

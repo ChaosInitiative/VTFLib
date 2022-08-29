@@ -1779,6 +1779,16 @@ vlUInt CVTFFile::GetMipmapCount() const
 }
 
 //
+// SetMipmapCount()
+// Sets the number of mipmaps the image has.
+//
+vlVoid CVTFFile::SetMipmapCount(vlUInt uiMipCount, VTFMipmapFilter MipmapFilter, vlBool bSRGB)
+{
+	this->Header->MipCount = uiMipCount;
+	this->GenerateMipmaps(MipmapFilter, bSRGB);
+}
+
+//
 // GetStartFrame()
 // Gets the first frame in the animation sequence.  If the image is
 // an enviroment map and 0xffff is returned, the enviroment map has
