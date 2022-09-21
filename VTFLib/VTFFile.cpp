@@ -188,6 +188,26 @@ CVTFFile::~CVTFFile()
 //
 vlBool CVTFFile::Create(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames, vlUInt uiFaces, vlUInt uiSlices, VTFImageFormat ImageFormat, vlBool bThumbnail, vlBool bMipmaps, vlBool bNullImageData)
 {
+	return this->Init(uiWidth, uiHeight, uiFrames, uiFaces, uiSlices, ImageFormat, bThumbnail, bMipmaps ? -1 : 1, bNullImageData);
+}
+
+//
+// Init()
+// Helper with struct as param instead
+//
+vlBool CVTFFile::Init(const SVTFInitOptions& o)
+{
+	return this->Init(o.uiWidth, o.uiHeight, o.uiFrames, o.uiFaces, o.uiSlices, o.ImageFormat, o.bThumbnail, o.nMipMaps, o.bNullImageData);
+}
+
+//
+// Init()
+// Creates a VTF file of the specified format and size.  Image data and other
+// options must be set after creation.  Essential format flags are automatically
+// generated.
+//
+vlBool CVTFFile::Init(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames, vlUInt uiFaces, vlUInt uiSlices, VTFImageFormat ImageFormat, vlBool bThumbnail, vlInt nMipmaps, vlBool bNullImageData)
+{
 	this->Destroy();
 
 	//
@@ -285,6 +305,11 @@ vlBool CVTFFile::Create(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames, vlUInt
 
 	this->Header = new SVTFHeader;
 	memset(this->Header, 0, sizeof(SVTFHeader));
+	
+	// Compute mipmap count if requested by user
+	if (nMipmaps < 0)
+		nMipmaps = this->ComputeMipmapCount(uiWidth, uiHeight, uiSlices);
+	nMipmaps = nMipmaps < 0 ? 1 : nMipmaps; // Make sure at least 1
 
 	strcpy(this->Header->TypeString, "VTF");
 	this->Header->Version[0] = VTF_MAJOR_VERSION;
@@ -295,7 +320,7 @@ vlBool CVTFFile::Create(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames, vlUInt
 	this->Header->Flags = (this->GetImageFormatInfo(ImageFormat).uiAlphaBitsPerPixel == 1 ? TEXTUREFLAGS_ONEBITALPHA : 0)
 							| (this->GetImageFormatInfo(ImageFormat).uiAlphaBitsPerPixel > 1 ? TEXTUREFLAGS_EIGHTBITALPHA : 0)
 							| (uiFaces == 1 ? 0 : TEXTUREFLAGS_ENVMAP)
-							| (bMipmaps ? 0 : TEXTUREFLAGS_NOMIP | TEXTUREFLAGS_NOLOD);
+							| (nMipmaps > 1 ? 0 : TEXTUREFLAGS_NOMIP | TEXTUREFLAGS_NOLOD);
 	this->Header->Frames = (vlShort)uiFrames;
 	this->Header->StartFrame = uiFaces != 6 || VTF_MINOR_VERSION_DEFAULT >= VTF_MINOR_VERSION_MIN_NO_SPHERE_MAP ? 0 : 0xffff;
 	this->Header->Reflectivity[0] = 1.0f;
@@ -303,7 +328,7 @@ vlBool CVTFFile::Create(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames, vlUInt
 	this->Header->Reflectivity[2] = 1.0f;
 	this->Header->BumpScale = 1.0f;
 	this->Header->ImageFormat = ImageFormat;
-	this->Header->MipCount = bMipmaps ? (vlByte)this->ComputeMipmapCount(uiWidth, uiHeight, uiSlices) : 1;
+	this->Header->MipCount = nMipmaps;
 	this->Header->Depth = (vlShort)uiSlices;
 	this->Header->ResourceCount = 0;
 
@@ -615,7 +640,7 @@ vlBool CVTFFile::Create(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames, vlUInt
 		}
 
 		// Create image (allocate and setup structures).
-		if(!this->Create(uiWidth, uiHeight, uiFrames, uiFaces + (VTFCreateOptions.bSphereMap && uiFaces == 6 ? 1 : 0), uiSlices, VTFCreateOptions.ImageFormat, VTFCreateOptions.bThumbnail, VTFCreateOptions.bMipmaps, vlFalse))
+		if(!this->Init(uiWidth, uiHeight, uiFrames, uiFaces + (VTFCreateOptions.bSphereMap && uiFaces == 6 ? 1 : 0), uiSlices, VTFCreateOptions.ImageFormat, VTFCreateOptions.bThumbnail, VTFCreateOptions.bMipmaps ? -1 : 1, vlFalse))
 		{
 			throw 0;
 		}
@@ -4097,7 +4122,7 @@ vlBool CVTFFile::ConvertInPlace(VTFImageFormat format)
 	const vlUInt uiSliceCount = GetDepth();
 
 	// Compute and allocate a working buffer- will replace lpImageData at the end
-	const vlUInt usBufferSize = this->ComputeImageSize(this->Header->Width, this->Header->Height, uiMipCount, this->Header->ImageFormat) * uiFrameCount * uiFaceCount;
+	const vlUInt usBufferSize = this->ComputeImageSize(this->Header->Width, this->Header->Height, uiMipCount, format) * uiFrameCount * uiFaceCount;
 	auto* buffer = new vlByte[usBufferSize];
 
 	// Holy sweet mother of nested loops...

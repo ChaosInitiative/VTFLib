@@ -7,6 +7,8 @@ project(vtflib C CXX)
 option(VTFLIB_STATIC "If enabled, builds VTFLIB as a static library" ON)
 option(VTFLIB_SHARED "If enabled, builds VTFLIB as a shared library" ON)
 
+set(CMAKE_CXX_STANDARD 17)
+
 include_directories(thirdparty/include thirdparty/miniz)
 
 if (UNIX)

@@ -64,8 +64,8 @@ typedef std::int64_t	vlInt64;
 
 typedef vlSingle		vlFloat;			//!< Floating point number (same as vlSingled).
 
-#define vlFalse			0
-#define vlTrue			1
+static inline constexpr vlBool vlFalse = 0;
+static inline constexpr vlBool vlTrue = 1;
 
 #if _MSC_VER >= 1400
 #	define _CRT_SECURE_NO_WARNINGS

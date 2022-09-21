@@ -92,6 +92,31 @@ typedef struct tagSVTFCreateOptions
 } SVTFCreateOptions;
 #pragma pack()
 
+//! VTF Init options struct.
+/*!  
+	The SVTFCreateOptions struct defines basic parameters of the texture
+
+	\see CVTFFile::Init()
+*/
+typedef struct tagSVTFInitOptions
+{
+	vlUInt uiWidth;
+	vlUInt uiHeight;
+	vlUInt uiSlices;
+	
+	vlUInt uiFrames;
+	vlUInt uiFaces;
+	
+	VTFImageFormat ImageFormat;
+	
+	vlBool bThumbnail;
+	vlUInt nMipMaps;
+	
+	vlBool bNullImageData;
+} SVTFInitOptions;
+
+
+
 #ifdef __cplusplus
 }
 #endif
@@ -156,9 +181,35 @@ namespace VTFLib
 
 	public:
 		
+		//! Inits a new empty VTF image
+		/*!
+			Inits a new empty VTF image. This is almost the same as the old Create function, but with a new name and takes total mip count
+		
+			\param uiWidth is the width in pixels of the main VTF image.
+			\param uiHeight is the height in pixels of the main VTF image.
+			\param uiFrames is the number of frames in the VTF image (default 1).
+			\param uiFaces is the number of faces in the VTF image (default 1).
+			\param uiSlices is the number of z slices in the VTF image (default 1).
+			\param ImageFormat is the storage format of the main VTF image (default RGBA8888).
+			\param nMipmaps is the number of mipmaps. If this is -1, vtflib will compute the number of mips for you based on image size.
+			\param bThumbnail sets if the VTF image will contain an additional thumbnail (default true).
+			\param bNullImageData sets if the image data should be zero'd out on creation (default false).
+		*/
+		vlBool Init(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames = 1, vlUInt uiFaces = 1, vlUInt uiSlices = 1, VTFImageFormat ImageFormat = IMAGE_FORMAT_RGBA8888, vlBool bThumbnail = vlTrue, vlInt nMipmaps = -1, vlBool bNullImageData = vlFalse);
+		
+		//! Inits a new empty VTF image
+		/*!
+			Inits a new empty VTF image. Same as the other variant of Init but takes a struct as a param
+		
+			\param initOpts is a struct containing init options for the texture
+			\see tagSVTFInitOptions
+		*/
+		vlBool Init(const SVTFInitOptions& initOpts);
+
 		//! Creates a new empty VTF image..
 		/*!
 			Creates a new empty VTF format image within a the current CVTFFile class.
+			Deprecated - Use Init instead!
 
 			\param uiWidth is the width in pixels of the main VTF image.
 			\param uiHeight is the height in pixels of the main VTF image.
@@ -172,8 +223,8 @@ namespace VTFLib
 			\note Animated and static textures have 1 face. Cubemaps have 6, one for each side of the cube.
 			\see tagSVTFCreateOptions
 		*/
-		vlBool Create(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames = 1, vlUInt uiFaces = 1, vlUInt uiSlices = 1, VTFImageFormat ImageFormat = IMAGE_FORMAT_RGBA8888, vlBool bThumbnail = vlTrue, vlBool bMipmaps = vlTrue, vlBool bNullImageData = vlFalse);
-		
+		[[deprecated]] vlBool Create(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames = 1, vlUInt uiFaces = 1, vlUInt uiSlices = 1, VTFImageFormat ImageFormat = IMAGE_FORMAT_RGBA8888, vlBool bThumbnail = vlTrue, vlBool bMipmaps = vlTrue, vlBool bNullImageData = vlFalse);
+
 		//! Create a new VTF image from existing data.
 		/*!
 			Creates a new VTF image using image data already stored in memory. The existing
