@@ -20,102 +20,122 @@
 #ifndef VTFFILE_H
 #define VTFFILE_H
 
-#include "stdafx.h"
 #include "Readers.h"
-#include "Writers.h"
 #include "VTFFormat.h"
+#include "Writers.h"
+#include "stdafx.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 //! VTFImageFormat info struct.
-/*!  
+/*!
 	The SVTFImageFormatInfo struct provides information on VTF image formats.
 
 	\see VTFImageFormat
 */
-#pragma pack(1)
-typedef struct tagSVTFImageFormatInfo
-{
-	const vlChar *lpName;			//!< Enumeration text equivalent.
-	vlUInt	uiBitsPerPixel;			//!< Format bits per pixel.
-	vlUInt	uiBytesPerPixel;		//!< Format bytes per pixel.
-	vlUInt	uiRedBitsPerPixel;		//!< Format red bits per pixel.  0 for N/A.
-	vlUInt	uiGreenBitsPerPixel;	//!< Format green bits per pixel.  0 for N/A.
-	vlUInt	uiBlueBitsPerPixel;		//!< Format blue bits per pixel.  0 for N/A.
-	vlUInt	uiAlphaBitsPerPixel;	//!< Format alpha bits per pixel.  0 for N/A.
-	vlBool	bIsCompressed;			//!< Format is compressed (DXT).
-	vlBool	bIsSupported;			//!< Format is supported by VTFLib.
-} SVTFImageFormatInfo;
+#pragma pack( 1 )
+	typedef struct tagSVTFImageFormatInfo
+	{
+		const vlChar *lpName;		//!< Enumeration text equivalent.
+		vlUInt uiBitsPerPixel;		//!< Format bits per pixel.
+		vlUInt uiBytesPerPixel;		//!< Format bytes per pixel.
+		vlUInt uiRedBitsPerPixel;	//!< Format red bits per pixel.  0 for N/A.
+		vlUInt uiGreenBitsPerPixel; //!< Format green bits per pixel.  0 for N/A.
+		vlUInt uiBlueBitsPerPixel;	//!< Format blue bits per pixel.  0 for N/A.
+		vlUInt uiAlphaBitsPerPixel; //!< Format alpha bits per pixel.  0 for N/A.
+		vlBool bIsCompressed;		//!< Format is compressed (DXT).
+		vlBool bIsSupported;		//!< Format is supported by VTFLib.
+	} SVTFImageFormatInfo;
 #pragma pack()
 
+	typedef vlVoid ( *TransformProc )( vlUInt16 &R, vlUInt16 &G, vlUInt16 &B, vlUInt16 &A );
+
+	typedef struct tagSVTFImageConvertInfo
+	{
+		vlUInt uiBitsPerPixel;		  // Format bytes per pixel.
+		vlUInt uiBytesPerPixel;		  // Format bytes per pixel.
+		vlUInt uiRBitsPerPixel;		  // Format conversion red bits per pixel.  0 for N/A.
+		vlUInt uiGBitsPerPixel;		  // Format conversion green bits per pixel.  0 for N/A.
+		vlUInt uiBBitsPerPixel;		  // Format conversion blue bits per pixel.  0 for N/A.
+		vlUInt uiABitsPerPixel;		  // Format conversion alpha bits per pixel.  0 for N/A.
+		vlInt iR;					  // "Red" index.
+		vlInt iG;					  // "Green" index.
+		vlInt iB;					  // "Blue" index.
+		vlInt iA;					  // "Alpha" index.
+		vlBool bIsCompressed;		  // Format is compressed (DXT).
+		vlBool bIsSupported;		  // Format is supported by VTFLib.
+		TransformProc pToTransform;	  // Custom transform to function.
+		TransformProc pFromTransform; // Custom transform from function.
+		VTFImageFormat Format;
+	} SVTFImageConvertInfo;
+
 //! VTF Creation options struct.
-/*!  
+/*!
 	The SVTFCreateOptions struct defines options and settings to be used when
 	creating VTF images	with methods such as CVTFFile::Create().
 
 	\see CVTFFile::Create()
 */
-#pragma pack(1)
-typedef struct tagSVTFCreateOptions
-{
-	vlUInt uiVersion[2];								//!< Output image version.
-	VTFImageFormat ImageFormat;							//!< Output image output storage format.
+#pragma pack( 1 )
+	typedef struct tagSVTFCreateOptions
+	{
+		vlUInt uiVersion[2];		  //!< Output image version.
+		VTFImageFormat ImageFormat;	  //!< Output image output storage format.
 
-	vlUInt uiFlags;										//!< Output image header flags.
-	vlUInt uiStartFrame;								//!< Output image start frame.
-	vlSingle sBumpScale;								//!< Output image bump scale.
-	vlSingle sReflectivity[3];							//!< Output image reflectivity. (Only used if bReflectivity is false.)
+		vlUInt uiFlags;				  //!< Output image header flags.
+		vlUInt uiStartFrame;		  //!< Output image start frame.
+		vlSingle sBumpScale;		  //!< Output image bump scale.
+		vlSingle sReflectivity[3];	  //!< Output image reflectivity. (Only used if bReflectivity is false.)
 
-	vlBool bMipmaps;									//!< Generate MIPmaps. (Space is always allocated.)
-	VTFMipmapFilter MipmapFilter;						//!< MIP map re-size filter.
+		vlBool bMipmaps;			  //!< Generate MIPmaps. (Space is always allocated.)
+		VTFMipmapFilter MipmapFilter; //!< MIP map re-size filter.
 
-	vlBool bThumbnail;									//!< Generate thumbnail image.
-	vlBool bReflectivity;								//!< Compute image reflectivity.
+		vlBool bThumbnail;			  //!< Generate thumbnail image.
+		vlBool bReflectivity;		  //!< Compute image reflectivity.
 
-	vlBool bResize;										//!< Resize the input image.
-	VTFResizeMethod ResizeMethod;						//!< New size compution method.
-	VTFMipmapFilter ResizeFilter;						//!< Re-size filter.
-	vlUInt uiResizeWidth;								//!< New width after re-size if method is RESIZE_SET.
-	vlUInt uiResizeHeight;								//!< New height after re-size if method is RESIZE_SET.
+		vlBool bResize;				  //!< Resize the input image.
+		VTFResizeMethod ResizeMethod; //!< New size compution method.
+		VTFMipmapFilter ResizeFilter; //!< Re-size filter.
+		vlUInt uiResizeWidth;		  //!< New width after re-size if method is RESIZE_SET.
+		vlUInt uiResizeHeight;		  //!< New height after re-size if method is RESIZE_SET.
 
-	vlBool bResizeClamp;								//!< Clamp re-size size.
-	vlUInt uiResizeClampWidth;							//!< Maximum width to re-size to.
-	vlUInt uiResizeClampHeight;							//!< Maximum height to re-size to.
+		vlBool bResizeClamp;		  //!< Clamp re-size size.
+		vlUInt uiResizeClampWidth;	  //!< Maximum width to re-size to.
+		vlUInt uiResizeClampHeight;	  //!< Maximum height to re-size to.
 
-	vlBool bGammaCorrection;							//!< Gamma correct input image.
-	vlSingle sGammaCorrection;							//!< Gamma correction to apply.
+		vlBool bGammaCorrection;	  //!< Gamma correct input image.
+		vlSingle sGammaCorrection;	  //!< Gamma correction to apply.
 
-	vlBool bSphereMap;									//!< Generate a sphere map for six faced environment maps.
-	vlBool bSRGB;										//!< Texture is in the SRGB color space.
-} SVTFCreateOptions;
+		vlBool bSphereMap;			  //!< Generate a sphere map for six faced environment maps.
+		vlBool bSRGB;				  //!< Texture is in the SRGB color space.
+	} SVTFCreateOptions;
 #pragma pack()
 
-//! VTF Init options struct.
-/*!  
-	The SVTFCreateOptions struct defines basic parameters of the texture
+	//! VTF Init options struct.
+	/*!
+		The SVTFCreateOptions struct defines basic parameters of the texture
 
-	\see CVTFFile::Init()
-*/
-typedef struct tagSVTFInitOptions
-{
-	vlUInt uiWidth;
-	vlUInt uiHeight;
-	vlUInt uiSlices;
-	
-	vlUInt uiFrames;
-	vlUInt uiFaces;
-	
-	VTFImageFormat ImageFormat;
-	
-	vlBool bThumbnail;
-	vlUInt nMipMaps;
-	
-	vlBool bNullImageData;
-} SVTFInitOptions;
+		\see CVTFFile::Init()
+	*/
+	typedef struct tagSVTFInitOptions
+	{
+		vlUInt uiWidth;
+		vlUInt uiHeight;
+		vlUInt uiSlices;
 
+		vlUInt uiFrames;
+		vlUInt uiFaces;
 
+		VTFImageFormat ImageFormat;
+
+		vlBool bThumbnail;
+		vlUInt nMipMaps;
+
+		vlBool bNullImageData;
+	} SVTFInitOptions;
 
 #ifdef __cplusplus
 }
@@ -135,7 +155,7 @@ namespace VTFLib
 		in short, uncompressed 32-bit image data. There are functions for
 		converting the data to other formats internally, however for image
 		creation you are probably sticking best with RGBA8888 for simplicity.
-	 
+
 		The majority of functions return a vlBool value. This is simply a
 		test as to whether a function has succeeded or failed to execute properly.
 		In the case of functions for checking flags, the vlBool indicates
@@ -145,18 +165,16 @@ namespace VTFLib
 	class VTFLIB_API CVTFFile
 	{
 	private:
+		SVTFHeader *Header;			  // VTF header
 
-		SVTFHeader *Header;						// VTF header
-	
-		vlUInt uiImageBufferSize;				// Size of VTF image data buffer
-		vlByte *lpImageData;					// VTF image buffer
+		vlUInt uiImageBufferSize;	  // Size of VTF image data buffer
+		vlByte *lpImageData;		  // VTF image buffer
 
-		vlUInt uiThumbnailBufferSize;			// Size of VTF thumbnail image data buffer
-		vlByte *lpThumbnailImageData;			// VTF thumbnail image buffer
+		vlUInt uiThumbnailBufferSize; // Size of VTF thumbnail image data buffer
+		vlByte *lpThumbnailImageData; // VTF thumbnail image buffer
 
 	public:
-
-		CVTFFile();		//!< Default constructor
+		CVTFFile(); //!< Default constructor
 
 		//! Create a new VTFFile class as a copy of another.
 		/*!
@@ -165,7 +183,7 @@ namespace VTFLib
 
 			\param VTFFile is the CVTFFile class you want to copy.
 		*/
-		CVTFFile(const CVTFFile &VTFFile);
+		CVTFFile( const CVTFFile &VTFFile );
 
 		//! Create a new VTFFile class as a duplicate of another.
 		/*!
@@ -175,16 +193,15 @@ namespace VTFLib
 			\param VTFFile is the CVTFFile class you want to copy.
 			\param ImageFormat the format you want to convert the copied image data to.
 		*/
-		CVTFFile(const CVTFFile &VTFFile, VTFImageFormat ImageFormat);
+		CVTFFile( const CVTFFile &VTFFile, VTFImageFormat ImageFormat );
 
-		~CVTFFile();	//!< Deconstructor
+		~CVTFFile(); //!< Deconstructor
 
 	public:
-		
 		//! Inits a new empty VTF image
 		/*!
 			Inits a new empty VTF image. This is almost the same as the old Create function, but with a new name and takes total mip count
-		
+
 			\param uiWidth is the width in pixels of the main VTF image.
 			\param uiHeight is the height in pixels of the main VTF image.
 			\param uiFrames is the number of frames in the VTF image (default 1).
@@ -195,16 +212,16 @@ namespace VTFLib
 			\param bThumbnail sets if the VTF image will contain an additional thumbnail (default true).
 			\param bNullImageData sets if the image data should be zero'd out on creation (default false).
 		*/
-		vlBool Init(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames = 1, vlUInt uiFaces = 1, vlUInt uiSlices = 1, VTFImageFormat ImageFormat = IMAGE_FORMAT_RGBA8888, vlBool bThumbnail = vlTrue, vlInt nMipmaps = -1, vlBool bNullImageData = vlFalse);
-		
+		vlBool Init( vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames = 1, vlUInt uiFaces = 1, vlUInt uiSlices = 1, VTFImageFormat ImageFormat = IMAGE_FORMAT_RGBA8888, vlBool bThumbnail = vlTrue, vlInt nMipmaps = -1, vlBool bNullImageData = vlFalse );
+
 		//! Inits a new empty VTF image
 		/*!
 			Inits a new empty VTF image. Same as the other variant of Init but takes a struct as a param
-		
+
 			\param initOpts is a struct containing init options for the texture
 			\see tagSVTFInitOptions
 		*/
-		vlBool Init(const SVTFInitOptions& initOpts);
+		vlBool Init( const SVTFInitOptions &initOpts );
 
 		//! Creates a new empty VTF image..
 		/*!
@@ -223,13 +240,13 @@ namespace VTFLib
 			\note Animated and static textures have 1 face. Cubemaps have 6, one for each side of the cube.
 			\see tagSVTFCreateOptions
 		*/
-		[[deprecated]] vlBool Create(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames = 1, vlUInt uiFaces = 1, vlUInt uiSlices = 1, VTFImageFormat ImageFormat = IMAGE_FORMAT_RGBA8888, vlBool bThumbnail = vlTrue, vlBool bMipmaps = vlTrue, vlBool bNullImageData = vlFalse);
+		[[deprecated]] vlBool Create( vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames = 1, vlUInt uiFaces = 1, vlUInt uiSlices = 1, VTFImageFormat ImageFormat = IMAGE_FORMAT_RGBA8888, vlBool bThumbnail = vlTrue, vlBool bMipmaps = vlTrue, vlBool bNullImageData = vlFalse );
 
 		//! Create a new VTF image from existing data.
 		/*!
 			Creates a new VTF image using image data already stored in memory. The existing
 			image data should be stored in RGBA8888 format.
-			
+
 			\param uiWidth is the width in pixels of the main VTF image.
 			\param uiHeight is the height in pixels of the main VTF image.
 			\param lpImageDataRGBA8888 is a pointer to the source RGBA8888 data.
@@ -237,13 +254,13 @@ namespace VTFLib
 			\return true on successful creation, otherwise false.
 			\see tagSVTFCreateOptions
 		*/
-		vlBool Create(vlUInt uiWidth, vlUInt uiHeight, vlByte *lpImageDataRGBA8888, const SVTFCreateOptions &VTFCreateOptions);
+		vlBool Create( vlUInt uiWidth, vlUInt uiHeight, vlByte *lpImageDataRGBA8888, const SVTFCreateOptions &VTFCreateOptions );
 
 		//! Create a new VTF multi-frame or cubemap image from existing data.
 		/*!
 			Creates a new multi-frame or cubemap VTF image using image data already stored
 			in memory. The existing image data should be stored in RGBA8888 format.
-			
+
 			\param uiWidth is the width in pixels of the main VTF image.
 			\param uiHeight is the height in pixels of the main VTF image.
 			\param uiFrames is the number of frames in the VTF image.
@@ -255,8 +272,8 @@ namespace VTFLib
 			\note Animated and static textures have 1 face. Cubemaps have 6, one for each side of the cube.
 			\see tagSVTFCreateOptions
 		*/
-		vlBool Create(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames, vlUInt uiFaces, vlUInt vlSlices, vlByte **lpImageDataRGBA8888, const SVTFCreateOptions &VTFCreateOptions);
-		
+		vlBool Create( vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames, vlUInt uiFaces, vlUInt vlSlices, vlByte **lpImageDataRGBA8888, const SVTFCreateOptions &VTFCreateOptions );
+
 		//! Destroys the current VTF image by setting the header, thumbnail and image data to zero.
 		vlVoid Destroy();
 
@@ -279,9 +296,9 @@ namespace VTFLib
 			\param bHeaderOnly sets whether to load just the VTF header or not (default false).
 			\return true on sucessful load, otherwise false.
 		*/
-		vlBool Load(const vlChar *cFileName, vlBool bHeaderOnly = vlFalse);
+		vlBool Load( const vlChar *cFileName, vlBool bHeaderOnly = vlFalse );
 
-		//! Loads a VTF image from memory. 
+		//! Loads a VTF image from memory.
 		/*!
 			Loads a VTF image file stored in memory into the current VTFFile class.
 			You may choose to load just the header only if you want to get info about the file
@@ -292,9 +309,9 @@ namespace VTFLib
 			\param bHeaderOnly sets whether to load just the VTF header or not (default false).
 			\return true on sucessful load, otherwise false.
 		*/
-		vlBool Load(const vlVoid *lpData, vlUInt uiBufferSize, vlBool bHeaderOnly = vlFalse);
+		vlBool Load( const vlVoid *lpData, vlUInt uiBufferSize, vlBool bHeaderOnly = vlFalse );
 
-		//! Loads a VTF image using callback functions. 
+		//! Loads a VTF image using callback functions.
 		/*!
 			Loads a VTF image file into the current VTFFile class.
 			You may choose to load just the header only if you want to get info about the file
@@ -304,7 +321,7 @@ namespace VTFLib
 			\param bHeaderOnly sets whether to load just the VTF header or not (default false).
 			\return true on sucessful load, otherwise false.
 		*/
-		vlBool Load(vlVoid *pUserData, vlBool bHeaderOnly = vlFalse);
+		vlBool Load( vlVoid *pUserData, vlBool bHeaderOnly = vlFalse );
 
 		//! Save a VTF image from disk.
 		/*!
@@ -313,7 +330,7 @@ namespace VTFLib
 			\param cFileName is the path and filename of the file to load.
 			\return true on sucessful save, otherwise false.
 		*/
-		vlBool Save(const vlChar *cFileName) const;
+		vlBool Save( const vlChar *cFileName ) const;
 
 		//! Save a VTF image to memory.
 		/*!
@@ -323,7 +340,7 @@ namespace VTFLib
 			\param uiBufferSize is the size of the VTF file in bytes.
 			\return true on sucessful save, otherwise false.
 		*/
-		vlBool Save(vlVoid *lpData, vlUInt uiBufferSize, vlUInt &uiSize) const;
+		vlBool Save( vlVoid *lpData, vlUInt uiBufferSize, vlUInt &uiSize ) const;
 
 		//! Save a VTF image using callback functions.
 		/*!
@@ -332,54 +349,53 @@ namespace VTFLib
 			\param pUserData is a pointer to custom user data.
 			\return true on sucessful save, otherwise false.
 		*/
-		vlBool Save(vlVoid *pUserData) const;
-		
+		vlBool Save( vlVoid *pUserData ) const;
+
 		//! Convert the internal storage of the VTF to the specified format
-		vlBool ConvertInPlace(VTFImageFormat format);
+		vlBool ConvertInPlace( VTFImageFormat format );
 
 	private:
-		vlBool IsPowerOfTwo(vlUInt uiSize);
-		vlUInt NextPowerOfTwo(vlUInt uiSize);
+		vlBool IsPowerOfTwo( vlUInt uiSize );
+		vlUInt NextPowerOfTwo( vlUInt uiSize );
 
-		vlVoid ComputeResources();	 //!< Computes header VTF directory resources.
+		vlVoid ComputeResources(); //!< Computes header VTF directory resources.
 
 		// Interface with out reader/writer classes
-		vlBool Load(IO::Readers::IReader *Reader, vlBool bHeaderOnly);
-		vlBool Save(IO::Writers::IWriter *Writer) const;
+		vlBool Load( IO::Readers::IReader *Reader, vlBool bHeaderOnly );
+		vlBool Save( IO::Writers::IWriter *Writer ) const;
 
 		// Saves a VTF with a given compression level
-		vlBool SaveCompressed(IO::Writers::IWriter* Writer, vlInt iCompressionLevel) const;
+		vlBool SaveCompressed( IO::Writers::IWriter *Writer, vlInt iCompressionLevel ) const;
 
 	public:
-
 		//! Check if image data has been loaded.
 		/*!
 			Check to see if the image buffer has data in it. If a VTF file was loaded
 			into the class with the bHeaderOnly option, this will return false.
-			
+
 			\return true if image data is present, otherwise false.
 		*/
 		vlBool GetHasImage() const;
 
-		vlUInt GetMajorVersion() const;	 //!< Returns the VTF file major version number.
-		vlUInt GetMinorVersion() const;	 //!< Returns the VTF file minor version number.
-		bool SetVersion(vlUInt major, vlUInt minor);
-		
-		vlUInt GetSize() const;			 //!< Returns the VTF file size in bytes.
+		vlUInt GetMajorVersion() const; //!< Returns the VTF file major version number.
+		vlUInt GetMinorVersion() const; //!< Returns the VTF file minor version number.
+		bool SetVersion( vlUInt major, vlUInt minor );
 
-		vlUInt GetWidth() const;	//!< Returns the width of the image in pixels from the VTF header.
-		vlUInt GetHeight() const;	//!< Returns the height of the image in pixels from the VTF header.
-		vlUInt GetDepth() const;	//!< Returns the depth of the image in pixels from the VTF header.
+		vlUInt GetSize() const;						 //!< Returns the VTF file size in bytes.
 
-		vlUInt GetFrameCount() const;	//!< Returns the frame count from the VTF header.
-		vlUInt GetFaceCount() const;	//!< Returns the face count from the VTF header.
-		vlUInt GetMipmapCount() const;	//!< Returns the number of MIP levels in the image from the VTF header.
+		vlUInt GetWidth() const;					 //!< Returns the width of the image in pixels from the VTF header.
+		vlUInt GetHeight() const;					 //!< Returns the height of the image in pixels from the VTF header.
+		vlUInt GetDepth() const;					 //!< Returns the depth of the image in pixels from the VTF header.
 
-		vlUInt GetStartFrame() const;				//!< Returns the start frame from the VTF header.
-		vlVoid SetStartFrame(vlUInt uiStartFrame);  //!< Sets the start frame in the VTF header.
+		vlUInt GetFrameCount() const;				 //!< Returns the frame count from the VTF header.
+		vlUInt GetFaceCount() const;				 //!< Returns the face count from the VTF header.
+		vlUInt GetMipmapCount() const;				 //!< Returns the number of MIP levels in the image from the VTF header.
 
-		vlUInt GetFlags() const;	//!< Returns the image flags from the VTF header.
-		vlVoid SetFlags(vlUInt uiFlags); 	//!< Sets the image flags in the VTF header.
+		vlUInt GetStartFrame() const;				 //!< Returns the start frame from the VTF header.
+		vlVoid SetStartFrame( vlUInt uiStartFrame ); //!< Sets the start frame in the VTF header.
+
+		vlUInt GetFlags() const;					 //!< Returns the image flags from the VTF header.
+		vlVoid SetFlags( vlUInt uiFlags );			 //!< Sets the image flags in the VTF header.
 
 		//! Check if a specific flag is set in the VTF header.
 		/*!
@@ -388,7 +404,7 @@ namespace VTFLib
 			\param ImageFlag is the flag you wish to check for.
 			\return true if the flag is set, otherwise false.
 		*/
-		vlBool GetFlag(VTFImageFlag ImageFlag) const;
+		vlBool GetFlag( VTFImageFlag ImageFlag ) const;
 
 		//! Set the state of a specific flag in the VTF header.
 		/*!
@@ -397,16 +413,16 @@ namespace VTFLib
 			\param ImageFlag is the flag you wish to set.
 			\param bState is the state you wish to set for the flag.
 		*/
-		vlVoid SetFlag(VTFImageFlag ImageFlag, vlBool bState);
+		vlVoid SetFlag( VTFImageFlag ImageFlag, vlBool bState );
 
-		vlSingle GetBumpmapScale() const;	//!< Get the bump scale value.
-		
+		vlSingle GetBumpmapScale() const; //!< Get the bump scale value.
+
 		//! Set the bump scale value.
 		/*!
 			Sets the bump scale in the VTF header to the given floating point value.
 			\param sBumpmapScale is the scale value to set.
 		*/
-		vlVoid SetBumpmapScale(vlSingle sBumpmapScale);
+		vlVoid SetBumpmapScale( vlSingle sBumpmapScale );
 
 		//! Get the reflectivity values.
 		/*!
@@ -414,7 +430,7 @@ namespace VTFLib
 
 			\param sX, sY, sZ are the variables to hold the values reflectivity vector.
 		*/
-		vlVoid GetReflectivity(vlSingle &sX, vlSingle &sY, vlSingle &sZ) const;
+		vlVoid GetReflectivity( vlSingle &sX, vlSingle &sY, vlSingle &sZ ) const;
 
 		//! Set the reflectivity values.
 		/*!
@@ -422,10 +438,10 @@ namespace VTFLib
 
 			\param sX, sY, sZ are the values for each reflectivity vector axis.
 		*/
-		vlVoid SetReflectivity(vlSingle sX, vlSingle sY, vlSingle sZ);
+		vlVoid SetReflectivity( vlSingle sX, vlSingle sY, vlSingle sZ );
 
-		VTFImageFormat GetFormat() const;	//!< Returns the storage format of the main image data set in the VTF header.
-		
+		VTFImageFormat GetFormat() const; //!< Returns the storage format of the main image data set in the VTF header.
+
 		//! Get a pointer to the image data for a specific image.
 		/*!
 			Returns a pointer to the image data for a given frame, face and MIP level.
@@ -439,13 +455,13 @@ namespace VTFLib
 			at index 0 for the largest image moving down in size.
 			\see GetFormat()
 		*/
-		vlByte *GetData(vlUInt uiFrame, vlUInt uiFace, vlUInt uiSlice, vlUInt uiMipmapLevel) const;
-		
+		vlByte *GetData( vlUInt uiFrame, vlUInt uiFace, vlUInt uiSlice, vlUInt uiMipmapLevel ) const;
+
 		//! Set the image data for a specific image.
 		/*!
 			Sets the image data for a given frame, face and MIP level. The source image
 			data pointed to by lpData must be in the format specified in the VTF header.
-			
+
 			\param uiFrame is the desired frame.
 			\param uiFace is the desired face.
 			\param uiSlice is the desired z slice.
@@ -457,16 +473,15 @@ namespace VTFLib
 			at index 0 for the largest image moving down in size.
 			\see GetFormat()
 		*/
-		vlVoid SetData(vlUInt uiFrame, vlUInt uiFace, vlUInt uiSlice, vlUInt uiMipmapLevel, vlByte *lpData);
+		vlVoid SetData( vlUInt uiFrame, vlUInt uiFace, vlUInt uiSlice, vlUInt uiMipmapLevel, vlByte *lpData );
 
 	public:
-		
-		vlBool GetHasThumbnail() const;		//!< Returns if a the current VTF image image contains a thumbnail version.
+		vlBool GetHasThumbnail() const;			   //!< Returns if a the current VTF image image contains a thumbnail version.
 
-		vlUInt GetThumbnailWidth() const;	//!< Returns the width in pixels of the current images thumbnail.
-		vlUInt GetThumbnailHeight() const;	//!< Returns the heught in pixels of the current images thumbnail.
+		vlUInt GetThumbnailWidth() const;		   //!< Returns the width in pixels of the current images thumbnail.
+		vlUInt GetThumbnailHeight() const;		   //!< Returns the heught in pixels of the current images thumbnail.
 
-		VTFImageFormat GetThumbnailFormat() const;	//!< Returns the image format of the current images thumbnail.
+		VTFImageFormat GetThumbnailFormat() const; //!< Returns the image format of the current images thumbnail.
 
 		//! Get a pointer to the thumbnail image data for the current image.
 		/*!
@@ -481,18 +496,18 @@ namespace VTFLib
 			Sets the thumbnail image data for the current image. The source image
 			data pointed to by lpData must be in the format specified for the thumbnail
 			in the VTF header.
-			
+
 			\param lpData is a pointer to the image data.
 			\see GetThumbnailFormat()
 		*/
-		vlVoid SetThumbnailData(vlByte *lpData);
+		vlVoid SetThumbnailData( vlByte *lpData );
 
 	public:
 		vlBool GetSupportsResources() const;			//!< Returns true if the current VTF file version supports resources.
 
 		vlUInt GetResourceCount() const;				//!< Returns the number of resources contained within the VTF file.
-		vlUInt GetResourceType(vlUInt uiIndex) const;	//!< Returns the resource type;
-		vlBool GetHasResource(vlUInt uiType) const;		//!< Returns true if the resource exists.
+		vlUInt GetResourceType( vlUInt uiIndex ) const; //!< Returns the resource type;
+		vlBool GetHasResource( vlUInt uiType ) const;	//!< Returns true if the resource exists.
 
 		//! Get a VTF resource type's data.
 		/*!
@@ -502,7 +517,7 @@ namespace VTFLib
 			\param uiSize is the size of the resource data.
 			\return a pointer to the resource data buffer if the resource exists.
 		*/
-		vlVoid *GetResourceData(vlUInt uiType, vlUInt &uiSize) const;
+		vlVoid *GetResourceData( vlUInt uiType, vlUInt &uiSize ) const;
 
 		//! Set a VTF resource type's data.
 		/*!
@@ -514,10 +529,10 @@ namespace VTFLib
 			\param lpData is the resource data; if null the resource data is zeroed.
 			\return a pointer to the resource data buffer if the resource exists or was created.
 		*/
-		vlVoid *SetResourceData(vlUInt uiType, vlUInt uiSize, vlVoid *lpData);
+		vlVoid *SetResourceData( vlUInt uiType, vlUInt uiSize, vlVoid *lpData );
 
 	public:
-		vlInt GetAuxCompressionLevel() const;						//!< Gets the auxiliary compression level of the VTF
+		vlInt GetAuxCompressionLevel() const; //!< Gets the auxiliary compression level of the VTF
 
 		//!< Returns true if the compression level was successfully set
 		/*!
@@ -527,10 +542,9 @@ namespace VTFLib
 			0 compression means no compression, 1-9 are increasing levels of compression and
 			SVTFAuxCompressionInfoHeader::DEFAULT_COMPRESSION lets the algorithm decide.
 		*/
-		vlBool SetAuxCompressionLevel(vlInt iCompressionLevel);
+		vlBool SetAuxCompressionLevel( vlInt iCompressionLevel );
 
 	public:
-
 		//! Generate MIP maps from the main image data.
 		/*!
 			Generates MIP maps for the image down to 1 x 1 pixel using the data in
@@ -540,7 +554,7 @@ namespace VTFLib
 			\param bSRGB is whether we are generating mips for color data or not.
 			\return true on sucessful creation, otherwise false.
 		*/
-		vlBool GenerateMipmaps(VTFMipmapFilter MipmapFilter, vlBool bSRGB);
+		vlBool GenerateMipmaps( VTFMipmapFilter MipmapFilter, vlBool bSRGB );
 
 		//! Generate MIP maps from a specific face and frame.
 		/*!
@@ -555,7 +569,7 @@ namespace VTFLib
 			for the first face. Cubemaps have 6 faces, others only 1.
 			\return true on sucessful creation, otherwise false.
 		*/
-		vlBool GenerateMipmaps(vlUInt uiFace, vlUInt uiFrame, VTFMipmapFilter MipmapFilter, vlBool bSRGB);
+		vlBool GenerateMipmaps( vlUInt uiFace, vlUInt uiFrame, VTFMipmapFilter MipmapFilter, vlBool bSRGB );
 
 		//! Generate a thumbnail image.
 		/*!
@@ -565,7 +579,7 @@ namespace VTFLib
 			\return true on sucessful creation, otherwise false.
 			\see SetThumbnailData()
 		*/
-		vlBool GenerateThumbnail(vlBool bSRGB);
+		vlBool GenerateThumbnail( vlBool bSRGB );
 
 		//! Convert image to a normal map.
 		/*!
@@ -578,13 +592,13 @@ namespace VTFLib
 			\return true on sucessful creation, otherwise false.
 			\note  The options for conversion are the same used in the nVidea NormalMap Photoshop plug-in.
 		*/
-		vlBool GenerateNormalMap(VTFKernelFilter KernelFilter = KERNEL_FILTER_3X3, VTFHeightConversionMethod HeightConversionMethod = HEIGHT_CONVERSION_METHOD_AVERAGE_RGB, VTFNormalAlphaResult NormalAlphaResult = NORMAL_ALPHA_RESULT_WHITE);
-		
+		vlBool GenerateNormalMap( VTFKernelFilter KernelFilter = KERNEL_FILTER_3X3, VTFHeightConversionMethod HeightConversionMethod = HEIGHT_CONVERSION_METHOD_AVERAGE_RGB, VTFNormalAlphaResult NormalAlphaResult = NORMAL_ALPHA_RESULT_WHITE );
+
 		//! Convert image to a normal map from a specific frame.
 		/*!
 			Converts the image to a normal map using the image data in
 			the given frame as the source.
-			
+
 			\param uiFrame is the frame index to use.
 			\param KernelFilter is the kernel filter to use (default 3x3).
 			\param HeightConversionMethod is the method of determining the height data from the source (default average RGB).
@@ -592,16 +606,14 @@ namespace VTFLib
 			\return true on sucessful creation, otherwise false.
 			\note  The options for conversion are the same used in the nVidea NormalMap Photoshop plug-in.
 		*/
-		vlBool GenerateNormalMap(vlUInt uiFrame, VTFKernelFilter KernelFilter = KERNEL_FILTER_3X3, VTFHeightConversionMethod HeightConversionMethod = HEIGHT_CONVERSION_METHOD_AVERAGE_RGB, VTFNormalAlphaResult NormalAlphaResult = NORMAL_ALPHA_RESULT_WHITE);
+		vlBool GenerateNormalMap( vlUInt uiFrame, VTFKernelFilter KernelFilter = KERNEL_FILTER_3X3, VTFHeightConversionMethod HeightConversionMethod = HEIGHT_CONVERSION_METHOD_AVERAGE_RGB, VTFNormalAlphaResult NormalAlphaResult = NORMAL_ALPHA_RESULT_WHITE );
 
-		vlBool GenerateSphereMap();		//!< Creates a spheremap from using the 6 faces of the image making up its cubemap.
+		vlBool GenerateSphereMap(); //!< Creates a spheremap from using the 6 faces of the image making up its cubemap.
 
 	public:
+		vlBool ComputeReflectivity(); //!< Calculates and sets the reflectivity vector values for the VTF image based on the colour averages of each pixel.
 
-		vlBool ComputeReflectivity();	//!< Calculates and sets the reflectivity vector values for the VTF image based on the colour averages of each pixel.
-	
 	public:
-
 		//! Get VTFImageFormat info.
 		/*!
 			Returns a SImageFormatInfo info struct for the specified VTFImageFormat.
@@ -609,7 +621,7 @@ namespace VTFLib
 			\param ImageFormat is the format to get info on.
 			\return SImageFormatInfo info struct.
 		*/
-		static SVTFImageFormatInfo const &GetImageFormatInfo(VTFImageFormat ImageFormat);
+		static SVTFImageFormatInfo const &GetImageFormatInfo( VTFImageFormat ImageFormat );
 
 		//! Calculate data buffer size for an image
 		/*!
@@ -623,7 +635,7 @@ namespace VTFLib
 			\param ImageFormat is the storage format of the image data.
 			\return size of the image data in bytes.
 		*/
-		static vlUInt ComputeImageSize(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiDepth, VTFImageFormat ImageFormat);
+		static vlUInt ComputeImageSize( vlUInt uiWidth, vlUInt uiHeight, vlUInt uiDepth, VTFImageFormat ImageFormat );
 
 		//! Calculate data buffer size for an image with MIP maps
 		/*!
@@ -638,7 +650,7 @@ namespace VTFLib
 			\param ImageFormat is the storage format of the image data.
 			\return size of the image data in bytes.
 		*/
-		static vlUInt ComputeImageSize(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiDepth, vlUInt uiMipmaps, VTFImageFormat ImageFormat);
+		static vlUInt ComputeImageSize( vlUInt uiWidth, vlUInt uiHeight, vlUInt uiDepth, vlUInt uiMipmaps, VTFImageFormat ImageFormat );
 
 		//! Compute the number of MIP maps needed by an image
 		/*!
@@ -650,7 +662,7 @@ namespace VTFLib
 			\param uiDepth is the depth in pixels of the original image.
 			\return number of MIP maps needed.
 		*/
-		static vlUInt ComputeMipmapCount(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiDepth);	//!< Returns how many MIP map levels are required for an image uiWidth and uiHeight in size, down to 1x1 pixel.
+		static vlUInt ComputeMipmapCount( vlUInt uiWidth, vlUInt uiHeight, vlUInt uiDepth ); //!< Returns how many MIP map levels are required for an image uiWidth and uiHeight in size, down to 1x1 pixel.
 
 		//! Compute the dimensions of a specific MIP level.
 		/*!
@@ -665,11 +677,11 @@ namespace VTFLib
 			\param uiMipmapHeight is the variable to hold the calculated height.
 			\param uiMipmapDepth is the variable to hold the calculated depth.
 		*/
-		static vlVoid ComputeMipmapDimensions(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiDepth, vlUInt uiMipmapLevel, vlUInt &uiMipmapWidth, vlUInt &uiMipmapHeight, vlUInt &uiMipmapDepth);
-		
+		static vlVoid ComputeMipmapDimensions( vlUInt uiWidth, vlUInt uiHeight, vlUInt uiDepth, vlUInt uiMipmapLevel, vlUInt &uiMipmapWidth, vlUInt &uiMipmapHeight, vlUInt &uiMipmapDepth );
+
 		//! Compute how much memory a specific MIP map level needs.
 		/*!
-			Computers the total memory needed in bytes for the a specific MIP map level 
+			Computers the total memory needed in bytes for the a specific MIP map level
 			of an image of a given width and height stored in the specified image format.
 
 			\param uiWidth is the width in pixels of the source image.
@@ -679,17 +691,15 @@ namespace VTFLib
 			\param ImageFormat is the image format the MIP map image data is stored in.
 			\return size of the MIP map image data in bytes.
 		*/
-		static vlUInt ComputeMipmapSize(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiDepth, vlUInt uiMipmapLevel, VTFImageFormat ImageFormat);
+		static vlUInt ComputeMipmapSize( vlUInt uiWidth, vlUInt uiHeight, vlUInt uiDepth, vlUInt uiMipmapLevel, VTFImageFormat ImageFormat );
 
 	private:
-
 		// Calculates where in the VTF image the data begins
-		vlUInt ComputeDataOffset(vlUInt uiFrame, vlUInt uiFace, vlUInt uiSlice, vlUInt uiMipmapLevel, VTFImageFormat ImageFormat) const;
+		vlUInt ComputeDataOffset( vlUInt uiFrame, vlUInt uiFace, vlUInt uiSlice, vlUInt uiMipmapLevel, VTFImageFormat ImageFormat ) const;
 
-		vlUInt GetAuxInfoOffset(vlUInt iFrame, vlUInt iFace, vlUInt iMipLevel) const;
+		vlUInt GetAuxInfoOffset( vlUInt iFrame, vlUInt iFace, vlUInt iMipLevel ) const;
 
 	public:
-
 		//! Convert an image to RGBA8888 format.
 		/*!
 			Converts image data stored in the given format to RGBA8888 format.
@@ -701,7 +711,7 @@ namespace VTFLib
 			\param SourceFormat is the image format of the source data.
 			\return true on sucessful conversion, otherwise false.
 		*/
-		static vlBool ConvertToRGBA8888(vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat SourceFormat);
+		static vlBool ConvertToRGBA8888( vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat SourceFormat );
 
 		//! Convert an image from RGBA8888 format.
 		/*!
@@ -714,7 +724,7 @@ namespace VTFLib
 			\param DestFormat is the image format you wish to convert to.
 			\return true on sucessful conversion, otherwise false.
 		*/
-		static vlBool ConvertFromRGBA8888(vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat DestFormat);
+		static vlBool ConvertFromRGBA8888( vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat DestFormat );
 
 		//! Convert an image from any format to any format.
 		/*!
@@ -728,7 +738,7 @@ namespace VTFLib
 			\param DestFormat is the image format you wish to convert to.
 			\return true on sucessful conversion, otherwise false.
 		*/
-		static vlBool Convert(vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat SourceFormat, VTFImageFormat DestFormat);
+		static vlBool Convert( vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat SourceFormat, VTFImageFormat DestFormat );
 
 		//! Re-sizes an image.
 		/*!
@@ -744,18 +754,16 @@ namespace VTFLib
 			\param bRGB is whether we are generating mips for color data or not.
 			\return true on sucessful re-size, otherwise false.
 		*/
-		static vlBool Resize(vlByte *lpSourceRGBA8888, vlByte *lpDestRGBA8888, vlUInt uiSourceWidth, vlUInt uiSourceHeight, vlUInt uiDestWidth, vlUInt uiDestHeight, VTFMipmapFilter ResizeFilter, vlBool bSRGB);
+		static vlBool Resize( vlByte *lpSourceRGBA8888, vlByte *lpDestRGBA8888, vlUInt uiSourceWidth, vlUInt uiSourceHeight, vlUInt uiDestWidth, vlUInt uiDestHeight, VTFMipmapFilter ResizeFilter, vlBool bSRGB );
 
 	private:
-		
 		// BCn format decompression function
-		static vlBool DecompressBCn(vlByte *src, vlByte *dst, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat SourceFormat);
+		static vlBool DecompressBCn( vlByte *src, vlByte *dst, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat SourceFormat );
 
 		// BCn format compression function
-		static vlBool CompressBCn(vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat DestFormat);
+		static vlBool CompressBCn( vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat DestFormat );
 
 	public:
-
 		//! Correct and images gamma.
 		/*!
 			Applies gamma correction to an image.
@@ -765,7 +773,7 @@ namespace VTFLib
 			\param uiHeight is the height of the source image in pixels.
 			\param sGammaCorrection is the amount of gamma correction to apply.
 		*/
-		static vlVoid CorrectImageGamma(vlByte *lpImageDataRGBA8888, vlUInt uiWidth, vlUInt uiHeight, vlSingle sGammaCorrection);
+		static vlVoid CorrectImageGamma( vlByte *lpImageDataRGBA8888, vlUInt uiWidth, vlUInt uiHeight, vlSingle sGammaCorrection );
 
 		//! Computes the reflectivity for an image.
 		/*!
@@ -780,11 +788,19 @@ namespace VTFLib
 			\see GetReflectivity()
 			\see SetReflectivity()
 		*/
-		static vlVoid ComputeImageReflectivity(vlByte *lpImageDataRGBA8888, vlUInt uiWidth, vlUInt uiHeight, vlSingle &sX, vlSingle &sY, vlSingle &sZ);
+		static vlVoid ComputeImageReflectivity( vlByte *lpImageDataRGBA8888, vlUInt uiWidth, vlUInt uiHeight, vlSingle &sX, vlSingle &sY, vlSingle &sZ );
 
-		static vlVoid FlipImage(vlByte *lpImageDataRGBA8888, vlUInt uiWidth, vlUInt uiHeight);		//!< Flips an image vertically along its X-axis.
-		static vlVoid MirrorImage(vlByte *lpImageDataRGBA8888, vlUInt uiWidth, vlUInt uiHeight);	//!< Flips an image horizontally along its Y-axis.
+		static vlVoid FlipImage( vlByte *lpImageDataRGBA8888, vlUInt uiWidth, vlUInt uiHeight );   //!< Flips an image vertically along its X-axis.
+		static vlVoid MirrorImage( vlByte *lpImageDataRGBA8888, vlUInt uiWidth, vlUInt uiHeight ); //!< Flips an image horizontally along its Y-axis.
+		vlBool CreateFloat( vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames, vlUInt uiFaces, vlUInt uiSlices, vlByte **lpImageDataFP, const SVTFCreateOptions &VTFCreateOptions, const VTFImageFormat &SourceFormat );
+		static vlBool ResizeFloat( vlByte *lpSourceRGBAFP32, vlByte *lpDestRGBFP32, vlUInt uiSourceWidth, vlUInt uiSourceHeight, vlUInt uiDestWidth, vlUInt uiDestHeight, VTFMipmapFilter ResizeFilter, vlBool bSRGB );
+		static vlSingle FP16ToFP32( vlUInt16 input );
+		static vlBool HALF_HDR_TO_LDR( vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, const tagSVTFImageConvertInfo &SourceInfo, const tagSVTFImageConvertInfo &DestInfo );
+		static vlBool HDR_TO_LDR( vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, const tagSVTFImageConvertInfo &SourceInfo, const tagSVTFImageConvertInfo &DestInfo );
+		static vlBool LDR_TO_HDR( vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, const SVTFImageConvertInfo &SourceInfo, const SVTFImageConvertInfo &DestInfo );
+		static unsigned short FP32ToFP16( float input );
+		vlBool Create( vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames, vlUInt uiFaces, vlUInt uiSlices, vlByte **lpImageDataRGBA8888, const SVTFCreateOptions &VTFCreateOptions, const VTFImageFormat &SourceFormat );
 	};
-}
+} // namespace VTFLib
 
 #endif
