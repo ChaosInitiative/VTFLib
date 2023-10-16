@@ -701,7 +701,7 @@ namespace VTFLib
 			\param SourceFormat is the image format of the source data.
 			\return true on sucessful conversion, otherwise false.
 		*/
-		static vlBool ConvertToRGBA8888(vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat SourceFormat);
+		static vlBool ConvertToRGBA8888(const vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat SourceFormat);
 
 		//! Convert an image from RGBA8888 format.
 		/*!
@@ -714,7 +714,7 @@ namespace VTFLib
 			\param DestFormat is the image format you wish to convert to.
 			\return true on sucessful conversion, otherwise false.
 		*/
-		static vlBool ConvertFromRGBA8888(vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat DestFormat);
+		static vlBool ConvertFromRGBA8888(const vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat DestFormat);
 
 		//! Convert an image from any format to any format.
 		/*!
@@ -728,7 +728,7 @@ namespace VTFLib
 			\param DestFormat is the image format you wish to convert to.
 			\return true on sucessful conversion, otherwise false.
 		*/
-		static vlBool Convert(vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat SourceFormat, VTFImageFormat DestFormat);
+		static vlBool Convert(const vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat SourceFormat, VTFImageFormat DestFormat);
 
 		//! Re-sizes an image.
 		/*!
@@ -744,15 +744,15 @@ namespace VTFLib
 			\param bRGB is whether we are generating mips for color data or not.
 			\return true on sucessful re-size, otherwise false.
 		*/
-		static vlBool Resize(vlByte *lpSourceRGBA8888, vlByte *lpDestRGBA8888, vlUInt uiSourceWidth, vlUInt uiSourceHeight, vlUInt uiDestWidth, vlUInt uiDestHeight, VTFMipmapFilter ResizeFilter, vlBool bSRGB);
+		static vlBool Resize(const vlByte *lpSourceRGBA8888, vlByte *lpDestRGBA8888, vlUInt uiSourceWidth, vlUInt uiSourceHeight, vlUInt uiDestWidth, vlUInt uiDestHeight, VTFMipmapFilter ResizeFilter, vlBool bSRGB);
 
 	private:
 		
 		// BCn format decompression function
-		static vlBool DecompressBCn(vlByte *src, vlByte *dst, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat SourceFormat);
+		static vlBool DecompressBCn(const vlByte *src, vlByte *dst, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat SourceFormat);
 
 		// BCn format compression function
-		static vlBool CompressBCn(vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat DestFormat);
+		static vlBool CompressBCn(const vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat DestFormat);
 
 	public:
 
