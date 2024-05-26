@@ -120,7 +120,7 @@ typedef enum tagVTFImageFormat
 
 
 //! VTF image header flags.
-typedef enum tagVTFImageFlag
+typedef enum tagVTFImageFlag : vlUInt32
 {
 	TEXTUREFLAGS_POINTSAMPLE								= 0x00000001,
 	TEXTUREFLAGS_TRILINEAR									= 0x00000002,
