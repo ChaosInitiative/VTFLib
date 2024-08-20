@@ -754,6 +754,9 @@ namespace VTFLib
 		// BCn format compression function
 		static vlBool CompressBCn(const vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat DestFormat);
 
+		// BC6H specific 
+		static vlBool CompressBC6H(const vlByte* lpSource, vlByte* lpDest, vlUInt uiWidth, vlUInt uiHeight);
+
 	public:
 
 		//! Correct and images gamma.

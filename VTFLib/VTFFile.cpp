@@ -440,6 +440,7 @@ static CMP_FORMAT GetCMPFormat( VTFImageFormat imageFormat, bool bDXT5GA )
 	// Swizzle is technically wrong for below but we reverse it in the shader!
 	case IMAGE_FORMAT_ATI2N:			return CMP_FORMAT_ATI2N;
 
+	case IMAGE_FORMAT_BC6H:				return CMP_FORMAT_BC6H;
 	case IMAGE_FORMAT_BC7:				return CMP_FORMAT_BC7;
 
 	default:							return CMP_FORMAT_Unknown;
@@ -3031,7 +3032,7 @@ static SVTFImageFormatInfo VTFImageFormatInfo[] =
 	{},
 	{},
 	{},
-	{},
+	{ "BC6H",					8,  0,  0,  0,  0,  0, vlTrue,  vlTrue  },			// IMAGE_FORMAT_BC6H
 	{ "BC7",					8,  0,  0,  0,  0,  0, vlTrue,  vlTrue  }			// IMAGE_FORMAT_BC7
 };
 
@@ -3066,6 +3067,7 @@ vlUInt CVTFFile::ComputeImageSize(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiDept
 	case IMAGE_FORMAT_DXT3:
 	case IMAGE_FORMAT_DXT5:
 	case IMAGE_FORMAT_ATI2N:
+	case IMAGE_FORMAT_BC6H:
 	case IMAGE_FORMAT_BC7:
 		if(uiWidth < 4 && uiWidth > 0)
 			uiWidth = 4;
@@ -3301,20 +3303,23 @@ vlBool CVTFFile::DecompressBCn(const vlByte *src, vlByte *dst, vlUInt uiWidth, v
 	return vlTrue;
 }
 
-//
+//-----------------------------------------------------------------------------------------------------
 // ConvertFromRGBA8888()
+// 
 // Convert input image data (lpSource) to output image data (lpDest) of format DestFormat.
-//
+//-----------------------------------------------------------------------------------------------------
 vlBool CVTFFile::ConvertFromRGBA8888(const vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat DestFormat)
 {
 	return CVTFFile::Convert(lpSource, lpDest, uiWidth, uiHeight, IMAGE_FORMAT_RGBA8888, DestFormat);
 }
 
-//
+//-----------------------------------------------------------------------------------------------------
 // CompressBCn()
+// 
 // Compress input image data (lpSource) to output image data (lpDest) of format DestFormat
-// where DestFormat is of format BCn.  Uses Compressonator library.
-//
+// where DestFormat is of format BCn.  Uses Compressonator library. 
+// --Does not support BC6H
+//-----------------------------------------------------------------------------------------------------
 vlBool CVTFFile::CompressBCn(const vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth, vlUInt uiHeight, VTFImageFormat DestFormat)
 {
 	CMP_Texture srcTexture = {0};
@@ -3346,6 +3351,74 @@ vlBool CVTFFile::CompressBCn(const vlByte *lpSource, vlByte *lpDest, vlUInt uiWi
 		LastError.Set( GetCMPErrorString( cmp_status ) );
 		return vlFalse;
 	}
+
+	return vlTrue;
+}
+
+//-----------------------------------------------------------------------------------------------------
+// CompressBC6H()
+// 
+// Compress input image data (lpSource) to output image data (lpDest) of format DestFormat
+// where DestFormat is of format BC6H.  Uses Compressonator library.
+// 
+// NOTE: For BC6H conversion, an extra step is needed that puts the source data into a half float 
+// format before conversion. Do not use BCn for BC6H compression. -klaxon
+//-----------------------------------------------------------------------------------------------------
+vlBool CVTFFile::CompressBC6H(const vlByte* lpSource, vlByte* lpDest, vlUInt uiWidth, vlUInt uiHeight)
+{
+	CMP_Texture srcTexture = { 0 };
+	srcTexture.dwSize = sizeof(srcTexture);
+	srcTexture.dwWidth = uiWidth;
+	srcTexture.dwHeight = uiHeight;
+	srcTexture.dwPitch = 4 * uiWidth;
+	srcTexture.format = CMP_FORMAT_RGBA_8888;
+	srcTexture.dwDataSize = uiHeight * srcTexture.dwPitch;
+	srcTexture.pData = (CMP_BYTE*)lpSource;
+
+	CMP_CompressOptions options = { 0 };
+	options.dwSize = sizeof(options);
+	options.dwnumThreads = 0;
+	options.bDXT1UseAlpha = false;
+
+	vlByte* lpMidBuf = new vlByte[CVTFFile::ComputeImageSize(uiWidth, uiHeight, 1, IMAGE_FORMAT_RGBA16161616F)];
+	CMP_Texture midTexture = { 0 };
+	midTexture.dwSize = sizeof(midTexture);
+	midTexture.dwWidth = uiWidth;
+	midTexture.dwHeight = uiHeight;
+	midTexture.dwPitch = 4 * uiWidth;
+	midTexture.format = CMP_FORMAT_RGBA_16F;
+	midTexture.dwDataSize = CMP_CalculateBufferSize(&srcTexture);
+	midTexture.pData = (CMP_BYTE*)lpMidBuf;
+
+	CMP_Texture destTexture = { 0 };
+	destTexture.dwSize = sizeof(destTexture);
+	destTexture.dwWidth = uiWidth;
+	destTexture.dwHeight = uiHeight;
+	destTexture.dwPitch = 0;
+	destTexture.format = CMP_FORMAT_BC6H;
+	destTexture.dwDataSize = CMP_CalculateBufferSize(&destTexture);
+	destTexture.pData = (CMP_BYTE*)lpDest;
+
+	// convert to the mid texture first (to pass a half-float format for bc6h)
+	CMP_ERROR cmp_status = CMP_ConvertTexture(&srcTexture, &midTexture, &options, NULL);
+	if (cmp_status != CMP_OK)
+	{
+		delete[] lpMidBuf;
+
+		LastError.Set(GetCMPErrorString(cmp_status));
+		return vlFalse;
+	}
+
+	cmp_status = CMP_ConvertTexture(&midTexture, &destTexture, &options, NULL);
+	if (cmp_status != CMP_OK)
+	{
+		delete[] lpMidBuf;
+
+		LastError.Set(GetCMPErrorString(cmp_status));
+		return vlFalse;
+	}
+
+	delete[] lpMidBuf;
 
 	return vlTrue;
 }
@@ -3556,7 +3629,7 @@ static SVTFImageConvertInfo VTFImageConvertInfo[IMAGE_FORMAT_COUNT] =
 	{},
 	{},
 	{},
-	{},
+	{	  8,  0,  0,  0,  0,  0,	-1, -1, -1, -1,	 vlTrue, vlTrue,	NULL, NULL,			IMAGE_FORMAT_BC6H},
 	{	  8,  0,  0,  0,  0,  0,	-1, -1, -1, -1,	 vlTrue, vlTrue,	NULL, NULL,			IMAGE_FORMAT_BC7},
 };
 
@@ -3857,6 +3930,7 @@ vlBool CVTFFile::Convert(const vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth,
 		case IMAGE_FORMAT_DXT5:
 		case IMAGE_FORMAT_ATI2N:
 		case IMAGE_FORMAT_ATI1N:
+		case IMAGE_FORMAT_BC6H:
 		case IMAGE_FORMAT_BC7:
 			bResult = CVTFFile::DecompressBCn(lpSource, lpConvBuf, uiWidth, uiHeight, SourceFormat);
 			break;
@@ -3878,6 +3952,9 @@ vlBool CVTFFile::Convert(const vlByte *lpSource, vlByte *lpDest, vlUInt uiWidth,
 			case IMAGE_FORMAT_ATI1N:
 			case IMAGE_FORMAT_BC7:
 				bResult = CVTFFile::CompressBCn(lpConvBuf ? lpConvBuf : lpSource, lpDest, uiWidth, uiHeight, DestFormat);
+				break;
+			case IMAGE_FORMAT_BC6H:
+				bResult = CVTFFile::CompressBC6H(lpConvBuf ? lpConvBuf : lpSource, lpDest, uiWidth, uiHeight);
 				break;
 			default:
 				bResult = CVTFFile::Convert(lpConvBuf ? lpConvBuf : lpSource, lpDest, uiWidth, uiHeight, IMAGE_FORMAT_RGBA8888, DestFormat);
