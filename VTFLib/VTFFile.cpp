@@ -27,6 +27,18 @@ using namespace VTFLib;
 #undef min
 #undef max
 
+static stbir_filter GetSTBIRFilterFromVTFMipmapFilter(VTFMipmapFilter MipmapFilter) {
+	switch (MipmapFilter) {
+		case MIPMAP_FILTER_BOX:      return STBIR_FILTER_BOX;
+		case MIPMAP_FILTER_TRIANGLE: return STBIR_FILTER_TRIANGLE;
+		case MIPMAP_FILTER_CUBIC:    return STBIR_FILTER_CUBICBSPLINE;
+		case MIPMAP_FILTER_CATROM:   return STBIR_FILTER_CATMULLROM;
+		case MIPMAP_FILTER_MITCHELL: return STBIR_FILTER_MITCHELL;
+		default:                     break;
+	}
+	return STBIR_FILTER_DEFAULT;
+}
+
 // Class construction
 // ------------------
 CVTFFile::CVTFFile()
@@ -688,11 +700,12 @@ vlBool CVTFFile::Create(vlUInt uiWidth, vlUInt uiHeight, vlUInt uiFrames, vlUInt
 						{
 							vlUShort usWidth  = std::max(1, this->Header->Width  >> m);
 							vlUShort usHeight = std::max(1, this->Header->Height >> m);
+							stbir_filter iMipFilter = GetSTBIRFilterFromVTFMipmapFilter(VTFCreateOptions.MipmapFilter);
 
 							if (!stbir_resize_uint8_generic(
 								pSource, this->Header->Width, this->Header->Height, 0,
 								temp.data(), usWidth, usHeight, 0,
-								4, 3, 0, STBIR_EDGE_CLAMP, STBIR_FILTER_BOX, VTFCreateOptions.bSRGB ? STBIR_COLORSPACE_SRGB : STBIR_COLORSPACE_LINEAR, NULL))
+								4, 3, 0, STBIR_EDGE_CLAMP, iMipFilter, VTFCreateOptions.bSRGB ? STBIR_COLORSPACE_SRGB : STBIR_COLORSPACE_LINEAR, NULL))
 							{
 								throw 0;
 							}
@@ -2452,23 +2465,7 @@ vlBool CVTFFile::GenerateMipmaps(vlUInt uiFace, vlUInt uiFrame, VTFMipmapFilter 
 	if (formatInfo.uiBlueBitsPerPixel > 0) iNumChannels++;
 	if (formatInfo.uiRedBitsPerPixel > 0) iNumChannels++;
 
-	// Determine mip filter
-	stbir_filter iMipFilter;
-	switch(MipmapFilter)
-	{
-	case MIPMAP_FILTER_BOX:
-		iMipFilter = STBIR_FILTER_BOX; break;
-	case MIPMAP_FILTER_TRIANGLE:
-		iMipFilter = STBIR_FILTER_TRIANGLE; break;
-	case MIPMAP_FILTER_CUBIC:
-		iMipFilter = STBIR_FILTER_CUBICBSPLINE; break;
-	case MIPMAP_FILTER_CATROM:
-		iMipFilter = STBIR_FILTER_CATMULLROM; break;
-	case MIPMAP_FILTER_MITCHELL:
-		iMipFilter = STBIR_FILTER_MITCHELL; break;
-	default:
-		iMipFilter = STBIR_FILTER_DEFAULT; break;
-	}
+	stbir_filter iMipFilter = GetSTBIRFilterFromVTFMipmapFilter(MipmapFilter);
 
 	bool bOk = true;
 	for (vlUInt32 i = 1; i < GetMipmapCount(); ++i)
@@ -3947,10 +3944,12 @@ vlBool CVTFFile::Resize(const vlByte *lpSourceRGBA8888, vlByte *lpDestRGBA8888, 
 {
 	assert(ResizeFilter >= 0 && ResizeFilter < MIPMAP_FILTER_COUNT);
 
+	stbir_filter iMipFilter = GetSTBIRFilterFromVTFMipmapFilter(ResizeFilter);
+
 	if (!stbir_resize_uint8_generic(
 		lpSourceRGBA8888, uiSourceWidth, uiSourceHeight, 0,
 		lpDestRGBA8888, uiDestWidth, uiDestHeight, 0,
-		4, 3, 0, STBIR_EDGE_CLAMP, STBIR_FILTER_BOX, bSRGB ? STBIR_COLORSPACE_SRGB : STBIR_COLORSPACE_LINEAR, NULL))
+		4, 3, 0, STBIR_EDGE_CLAMP, iMipFilter, bSRGB ? STBIR_COLORSPACE_SRGB : STBIR_COLORSPACE_LINEAR, NULL))
 	{
 		LastError.Set("Error resizing image.");
 		return vlFalse;
