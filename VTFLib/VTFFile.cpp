@@ -3032,8 +3032,9 @@ static SVTFImageFormatInfo VTFImageFormatInfo[] =
 	{},
 	{},
 	{},
-	{ "BC6H",					8,  0,  0,  0,  0,  0, vlTrue,  vlTrue  },			// IMAGE_FORMAT_BC6H
-	{ "BC7",					8,  0,  0,  0,  0,  0, vlTrue,  vlTrue  }			// IMAGE_FORMAT_BC7
+	{},
+	{ "BC7",					8,  0,  0,  0,  0,  0, vlTrue,  vlTrue  },			// IMAGE_FORMAT_BC7
+	{ "BC6H",					8,  0,  0,  0,  0,  0, vlTrue,  vlTrue	}			// IMAGE_FORMAT_BC6H
 };
 
 SVTFImageFormatInfo const &CVTFFile::GetImageFormatInfo(VTFImageFormat ImageFormat)
@@ -3387,7 +3388,7 @@ vlBool CVTFFile::CompressBC6H(const vlByte* lpSource, vlByte* lpDest, vlUInt uiW
 	midTexture.dwHeight = uiHeight;
 	midTexture.dwPitch = 4 * uiWidth;
 	midTexture.format = CMP_FORMAT_RGBA_16F;
-	midTexture.dwDataSize = CMP_CalculateBufferSize(&srcTexture);
+	midTexture.dwDataSize = CMP_CalculateBufferSize(&midTexture);
 	midTexture.pData = (CMP_BYTE*)lpMidBuf;
 
 	CMP_Texture destTexture = { 0 };
@@ -3629,8 +3630,9 @@ static SVTFImageConvertInfo VTFImageConvertInfo[IMAGE_FORMAT_COUNT] =
 	{},
 	{},
 	{},
-	{	  8,  0,  0,  0,  0,  0,	-1, -1, -1, -1,	 vlTrue, vlTrue,	NULL, NULL,			IMAGE_FORMAT_BC6H},
+	{},
 	{	  8,  0,  0,  0,  0,  0,	-1, -1, -1, -1,	 vlTrue, vlTrue,	NULL, NULL,			IMAGE_FORMAT_BC7},
+	{	  8,  0,  0,  0,  0,  0,	-1, -1, -1, -1,	 vlTrue, vlTrue,	NULL, NULL,			IMAGE_FORMAT_BC6H}
 };
 
 // Get each channels shift and mask (for encoding and decoding).
