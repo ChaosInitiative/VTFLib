@@ -3386,7 +3386,7 @@ vlBool CVTFFile::CompressBC6H(const vlByte* lpSource, vlByte* lpDest, vlUInt uiW
 	midTexture.dwSize = sizeof(midTexture);
 	midTexture.dwWidth = uiWidth;
 	midTexture.dwHeight = uiHeight;
-	midTexture.dwPitch = 4 * uiWidth;
+	midTexture.dwPitch = 8 * uiWidth;
 	midTexture.format = CMP_FORMAT_RGBA_16F;
 	midTexture.dwDataSize = CMP_CalculateBufferSize(&midTexture);
 	midTexture.pData = (CMP_BYTE*)lpMidBuf;
