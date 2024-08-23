@@ -94,8 +94,9 @@ typedef enum tagVTFImageFormat
 
 	IMAGE_FORMAT_ATI2N,						//!<  = Red, Green BC5 compressed format - 8 bpp
 	IMAGE_FORMAT_ATI1N,						//!<  = Red BC4 compressed format - 4 bpp
-
+	
 	IMAGE_FORMAT_BC7 = 70,					//!<  = Red, Green, Blue, Alpha BC7 compressed format - 8 bpp
+	IMAGE_FORMAT_BC6H,						//!<  = Red, Green, Blue, BC6H (signed) compressed format - 8 bpp
 	/*
 	XBox:
 	IMAGE_FORMAT_X360_DST16,

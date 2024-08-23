@@ -61,21 +61,35 @@ endif()
 # Link against compressonator libs & set runtime lib
 if (UNIX)
 	if (VTFLIB_SHARED)
-		target_link_directories(vtflib PUBLIC thirdparty/lib/x64)
-		target_link_libraries(vtflib PUBLIC CMP_Compressonator pthread)
+		target_link_directories(vtflib PUBLIC thirdparty/lib/linux_x86_64)
+		target_link_libraries(vtflib PUBLIC
+				Compressonator
+				CMP_Core
+				CMP_Core_AVX
+				CMP_Core_AVX512
+				CMP_Core_SSE
+				pthread
+		)
 	endif()
 	if (VTFLIB_STATIC)
-		target_link_directories(vtflib_static PUBLIC thirdparty/lib/x64)
-		target_link_libraries(vtflib_static PUBLIC CMP_Compressonator pthread)
+		target_link_directories(vtflib_static PUBLIC thirdparty/lib/linux_x86_64)
+		target_link_libraries(vtflib_static PUBLIC
+				Compressonator
+				CMP_Core
+				CMP_Core_AVX
+				CMP_Core_AVX512
+				CMP_Core_SSE
+				pthread
+		)
 	endif()
 else()
 	if (VTFLIB_SHARED)
-		target_link_directories(vtflib PUBLIC thirdparty/lib)
+		target_link_directories(vtflib PUBLIC thirdparty/lib/win_x86_64)
 		target_link_libraries(vtflib PUBLIC "Compressonator_MT$<$<CONFIG:Debug>:d>")
 	endif()
 	if (VTFLIB_STATIC)
 		target_link_libraries(vtflib_static PUBLIC "Compressonator_MT$<$<CONFIG:Debug>:d>")
-		target_link_directories(vtflib_static PUBLIC thirdparty/lib)
+		target_link_directories(vtflib_static PUBLIC thirdparty/lib/win_x86_64)
 	endif()
 endif()
 
