@@ -62,13 +62,14 @@ endif()
 if (UNIX)
 	if (VTFLIB_SHARED)
 		target_link_directories(vtflib PUBLIC thirdparty/lib/linux_x86_64)
-		target_link_libraries(vtflib 
-		PUBLIC CMP_Compressonator pthread
-		PUBLIC CMP_Core pthread
-		PUBLIC CMP_Core_AVX pthread
-		PUBLIC CMP_Core_AVX512 pthread
-		PUBLIC CMP_Core_SSE pthread
-		PUBLIC CMP_Framework pthread
+		target_link_libraries(vtflib PUBLIC
+				CMP_Compressonator
+				CMP_Core
+				CMP_Core_AVX
+				CMP_Core_AVX512
+				CMP_Core_SSE
+				CMP_Framework
+				pthread
 		)
 	endif()
 	if (VTFLIB_STATIC)
