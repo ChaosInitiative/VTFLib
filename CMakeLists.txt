@@ -63,7 +63,7 @@ if (UNIX)
 	if (VTFLIB_SHARED)
 		target_link_directories(vtflib PUBLIC thirdparty/lib/linux_x86_64)
 		target_link_libraries(vtflib PUBLIC
-				CMP_Compressonator
+				Compressonator
 				CMP_Core
 				CMP_Core_AVX
 				CMP_Core_AVX512
@@ -75,7 +75,7 @@ if (UNIX)
 	if (VTFLIB_STATIC)
 		target_link_directories(vtflib_static PUBLIC thirdparty/lib/linux_x86_64)
 		target_link_libraries(vtflib_static PUBLIC
-				CMP_Compressonator
+				Compressonator
 				CMP_Core
 				CMP_Core_AVX
 				CMP_Core_AVX512
