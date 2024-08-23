@@ -68,7 +68,6 @@ if (UNIX)
 				CMP_Core_AVX
 				CMP_Core_AVX512
 				CMP_Core_SSE
-				CMP_Framework
 				pthread
 		)
 	endif()
@@ -80,7 +79,6 @@ if (UNIX)
 				CMP_Core_AVX
 				CMP_Core_AVX512
 				CMP_Core_SSE
-				CMP_Framework
 				pthread
 		)
 	endif()
